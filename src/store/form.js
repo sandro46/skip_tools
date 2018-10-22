@@ -15,6 +15,7 @@ const state = {
               label: 'Имя шаблона:',
               name: 'name',
               placeHolder: '',
+              required: 'true',
               value: ''
             },
             {
@@ -30,6 +31,13 @@ const state = {
               name: 'n_source_id',
               items: sources,
               value: []
+            },
+            {
+              type: 'text',
+              label: 'Более(дней):',
+              name: 'n_days_older',
+              placeHolder: '',
+              value: ''
             },
             {
               type: 'text',
@@ -75,6 +83,7 @@ const state = {
                 {text:'Почти низкий', value: 4},
                 {text:'Низкий', value: 5},
               ],
+              required: 'true',
               value: ''
             },
             {
@@ -85,6 +94,7 @@ const state = {
                 {text:'ФИО+ДР', value: 'fio'},
                 {text:'ФИ', value: 'fi'},
               ],
+              required: 'true',
               value: ''
             },
             // {
@@ -133,6 +143,9 @@ const getters = {
   }
   ,getItemByName: (state) => (name) => {
     return state.items.find(el => {return el.name == name} )
+  }
+  ,getRequiredEmpty: (state) => {
+    return state.items.filter(el => {return el.required == 'true' && !el.value} )
   }
   ,getCurrentName: (state) => {
     return state.items.find(el => {return el.name == 'name'} ).value

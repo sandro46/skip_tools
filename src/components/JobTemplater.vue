@@ -17,7 +17,7 @@
               <label class="mr-sm-2" :for='item.name'>{{item.label}}</label>
               <b-form-input v-if='item.type == "text"' type="text" v-model='item.value'  ></b-form-input>
 
-              <b-form-group v-if='item.type == "checkBox"' :label='item.text'>
+              <b-form-group v-if='item.type == "checkBox"'  :label='item.text'>
                 <b-form-checkbox-group stacked :id="item.name" :name="item.name" v-model="item.value">
                   <b-form-checkbox v-for='i in item.items' :key='i.value' :value='i.value' :id='item.name+i.text'>{{i.text}}</b-form-checkbox>
                 </b-form-checkbox-group>
@@ -100,11 +100,15 @@ export default {
   },
   methods: {
     setTask(){
-      let tplName = this.$store.getters.getCurrentName
-      if(tplName == '') {
-        window.alert('Имя шаблона не может быть пустым!');
+
+      let required = this.$store.getters.getRequiredEmpty
+      if(required.length > 0){
+        let alertStr = []
+        required.forEach((e, i) => { alertStr.push(e.label)} )
+        alert('Параметры '+'"'+alertStr.join('" ,"')+'" обязательны!')
         return;
       }
+      
       if(!window.confirm('Шаблон с существующим именем будет перезаписан. Вы уверены что хотите сохранить шаблон?')) return;
       this.$store.dispatch('saveTpl', tplName).then(
         (resolve) => {
@@ -135,11 +139,15 @@ export default {
       }
     },
     saveTpl(){
-      let tplName = this.$store.getters.getCurrentName
-      if(tplName == '') {
-        window.alert('Имя шаблона не может быть пустым!');
+
+      let required = this.$store.getters.getRequiredEmpty
+      if(required.length > 0){
+        let alertStr = []
+        required.forEach((e, i) => { alertStr.push(e.label)} )
+        alert('Параметры '+'"'+alertStr.join('" ,"')+'" обязательны!')
         return;
       }
+
       if(!window.confirm('Шаблон с существующим именем будет перезаписан. Вы уверены что хотите сохранить шаблон?')) return;
       this.$store.dispatch('saveTpl', tplName).then(
         (resolve) => { alert('Шаблон сохранён'); this.$store.dispatch('loadTplList'); console.log('saveTpl OK'); },

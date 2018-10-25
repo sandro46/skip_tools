@@ -108,8 +108,10 @@ export default {
         alert('Параметры '+'"'+alertStr.join('" ,"')+'" обязательны!')
         return;
       }
-      
+
+
       if(!window.confirm('Шаблон с существующим именем будет перезаписан. Вы уверены что хотите сохранить шаблон?')) return;
+      let tplName = this.$store.getters.getCurrentName
       this.$store.dispatch('saveTpl', tplName).then(
         (resolve) => {
           this.$store.dispatch('loadTplList');
@@ -149,6 +151,7 @@ export default {
       }
 
       if(!window.confirm('Шаблон с существующим именем будет перезаписан. Вы уверены что хотите сохранить шаблон?')) return;
+      let tplName = this.$store.getters.getCurrentName
       this.$store.dispatch('saveTpl', tplName).then(
         (resolve) => { alert('Шаблон сохранён'); this.$store.dispatch('loadTplList'); console.log('saveTpl OK'); },
         (reject) => { alert('Ошибка сохранения шаблона!'); console.log(reject); }

@@ -4,6 +4,7 @@ const sources = [
     { text: 'HH', value: 26 },
     { text: 'VK', value: 32 },
     { text: 'ФССП', value: 39 },
+    { text: 'GOOGLE', value: 37 },
     { text: 'БРС', value: 30 },
     { text: 'НБКИ', value: 10 },
   ];

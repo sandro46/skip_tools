@@ -28,6 +28,13 @@
                 <option v-for='i in item.items' :key='i.value' :value="i.value">{{i.text}}</option>
               </b-form-select>
 
+              <div v-if='item.type == "file_agreement_id_list"'>
+                <b-form-file  v-model="item.file" :state="Boolean(item.file)" :placeholder="item.label" @change="uploadAgreementList"></b-form-file>
+                <!-- <div class="mt-3">Selected file: {{item.file && item.file.name}}</div> -->
+                <b-form-input type="text" v-model='item.value'  ></b-form-input>
+              </div>
+
+
             </b-col>
           </b-row>
         </b-col>
@@ -58,7 +65,7 @@
       <b-modal ref="modalSql" size="lg" hide-footer class="modal-big" title="Выберите шаблон для загрузки.">
         <div class="d-block text-left">
           <i>Количество найденных: {{ cur_cnt }}</i>
-          <pre>{{ cur_sql }}</pre>
+          <div> <textarea name="name" rows="20" cols="80">{{ cur_sql }}</textarea></div>
         </div>
       </b-modal>
   </div>
@@ -74,7 +81,7 @@ export default {
   mounted: function () {
     // `this` указывает на экземпляр vm
     // console.log('Значение msg: ' + this.msg)
-    this.$store.dispatch('loadContragent');
+    // this.$store.dispatch('loadContragent');
     this.$store.dispatch('loadTplList');
     this.groupRows()
     // this.$store.actions.
@@ -99,8 +106,15 @@ export default {
     ,cur_cnt() {   return this.$store.getters.getCurrentCnt }
   },
   methods: {
+    async uploadAgreementList(e){
+      let data = new FormData()
+      data.append('file', e.target.files[0])
+      data.append('cmd', 'parse_agreement_csv')
+      let res = await this.$store.dispatch('uploadAgreementList', data)
+      if(!res) window.alert('Не удалось определить содержимое файла. Файл должен быть csv и не более 2.5Мб')
+    },
+    
     setTask(){
-
       let required = this.$store.getters.getRequiredEmpty
       if(required.length > 0){
         let alertStr = []

@@ -1,12 +1,12 @@
 import axios from 'axios'
 const config = require('./config.json')
 const sources = [
-    { text: 'HH', value: 26 },
-    { text: 'VK', value: 32 },
+    // { text: 'HH', value: 26 },
+    // { text: 'VK', value: 32 },
     { text: 'ФССП', value: 39 },
-    { text: 'GOOGLE', value: 37 },
-    { text: 'БРС', value: 30 },
-    { text: 'НБКИ', value: 10 },
+    // { text: 'GOOGLE', value: 37 },
+    // { text: 'БРС', value: 30 },
+    // { text: 'НБКИ', value: 10 },
   ];
 
 const state = {
@@ -26,26 +26,26 @@ const state = {
               items: sources,
               value: []
             },
-            {
-              type: 'checkBox',
-              label: 'Не был на:',
-              name: 'n_source_id',
-              items: sources,
-              value: []
-            },
-            {
-              type: 'text',
-              label: 'Более(дней):',
-              name: 'n_days_older',
-              placeHolder: '',
-              value: ''
-            },
-            {
-              type: 'text',
-              label: 'Дата выхода больше чем (дней):',
-              name: 'end_date_to',
-              value: ''
-            },
+            // {
+            //   type: 'checkBox',
+            //   label: 'Не был на:',
+            //   name: 'n_source_id',
+            //   items: sources,
+            //   value: []
+            // },
+            // {
+            //   type: 'text',
+            //   label: 'Более(дней):',
+            //   name: 'n_days_older',
+            //   placeHolder: '',
+            //   value: ''
+            // },
+            // {
+            //   type: 'text',
+            //   label: 'Дата выхода больше чем (дней):',
+            //   name: 'end_date_to',
+            //   value: ''
+            // },
             {
               type: 'text',
               label: 'Сумма задол-ти от:',
@@ -59,6 +59,13 @@ const state = {
               value: ''
             },
             {
+              type: 'file_agreement_id_list',
+              label: 'Список ID(Greender) долга в файле',
+              name: 'agreement_id_list',
+              file: null,
+              value: ''
+            },
+            {
               type: 'select',
               label: 'Контрагент:',
               name: 'bank_id',
@@ -66,13 +73,13 @@ const state = {
               value: '',
               change: 'get_portfolio_list',
             },
-            {
-              type: 'select',
-              label: 'Портфель:',
-              name: 'portfolio_id',
-              items: [],
-              value: ''
-            },
+            // {
+            //   type: 'select',
+            //   label: 'Портфель:',
+            //   name: 'portfolio_id',
+            //   items: [],
+            //   value: ''
+            // },
             {
               type: 'select',
               label: 'Приоритет:',
@@ -107,29 +114,29 @@ const state = {
             //   ],
             //   value: ''
             // },
-            {
-              type: 'checkBox',
-              label: 'День недели:',
-              name: 'weekday_id',
-              items: [
-                {text:'Каждый день', value: 8},
-                {text:'Понедельник', value: 1},
-                {text:'Вторник', value: 2},
-                {text:'Среда', value: 3},
-                {text:'Четверг', value: 4},
-                {text:'Пятница', value: 5},
-                {text:'Суббота', value: 6},
-                {text:'Воскресенье', value: 7},
-              ],
-              value: []
-            },
-            {
-              type: 'text',
-              label: 'Время запуска:',
-              name: 'time_start',
-              placeHolder: '',
-              value: ''
-            }
+            // {
+            //   type: 'checkBox',
+            //   label: 'День недели:',
+            //   name: 'weekday_id',
+            //   items: [
+            //     {text:'Каждый день', value: 8},
+            //     {text:'Понедельник', value: 1},
+            //     {text:'Вторник', value: 2},
+            //     {text:'Среда', value: 3},
+            //     {text:'Четверг', value: 4},
+            //     {text:'Пятница', value: 5},
+            //     {text:'Суббота', value: 6},
+            //     {text:'Воскресенье', value: 7},
+            //   ],
+            //   value: []
+            // },
+            // {
+            //   type: 'text',
+            //   label: 'Время запуска:',
+            //   name: 'time_start',
+            //   placeHolder: '',
+            //   value: ''
+            // }
 
           ],
     tpl_list: [],
@@ -167,6 +174,10 @@ const getters = {
 }
 
 const mutations = {
+  setAgreementsList(state, listStr){
+    let idx = state.items.findIndex(el => { return el.name == 'agreement_id_list'; });
+    state.items[idx]['value'] = listStr;
+  },
   setCurrentSql(state, sql){
     state.current_sql = sql;
   },
@@ -190,6 +201,9 @@ const mutations = {
   },
   setCurrentTplById(state, id){
     let tpl = state.tpl_list.find(el => {return el.id == id} );
+    if(typeof tpl.template != 'object'){
+      tpl.template = JSON.parse(tpl.template)
+    }
     tpl.template.forEach(el => {
       state.items.forEach(el1 => {
         if(el1.name == el.name) {
@@ -201,10 +215,22 @@ const mutations = {
 }
 
 const actions = {
+  async uploadAgreementList({commit}, fileData){
+    let res = await axios({
+      url: '/file-package',
+      baseURL: config.base_url,
+      headers: {'Content-Type': 'multipart/form-data'},
+      method: 'post',
+      data: fileData
+    }).catch((e) => { console.log(e); return false; })
+    if(!res) return false;
+    commit('setAgreementsList', res.data.payload)
+    return true
+  },
   makeSql({state, commit}){
     return new Promise((resolve, reject) => {
       axios({
-        url: '/template.php',
+        url: '/template',
         baseURL: config.base_url,
         method: 'put',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -212,13 +238,13 @@ const actions = {
       })
         .then(function (response) {
           // console.log(response.data);
-          if (response.data.err == '') {
-            commit('setCurrentSql', response.data.payload.sql);
-            commit('setCurrentCnt', response.data.payload.cnt);
-            resolve('OK')
-          } else {
+          if (response.status != 200) {
             reject(response.data.err ? response.data.err : '500 Ошибка обработки запроса на сервере.')
           }
+          commit('setCurrentSql', response.data.payload.sql);
+          commit('setCurrentCnt', response.data.payload.cnt);
+          resolve('OK')
+
         })
         .catch(function (error) {
           reject(error)
@@ -228,19 +254,18 @@ const actions = {
   delTpl({commit}, id){
     return new Promise((resolve, reject) => {
       axios({
-        url: '/template.php',
+        url: '/template',
         baseURL: config.base_url,
         method: 'delete',
-        params: {id}
+        data: {id}
       })
         .then(function (response) {
           // console.log(response.data);
-          if (response.data.err == '') {
-            commit('delTpl', id);
-            resolve('OK')
-          } else {
+          if (response.status != 200) {
             reject(response.data.err ? response.data.err : '500 Ошибка обработки запроса на сервере.')
           }
+          commit('delTpl', id);
+          resolve('OK')
         })
         .catch(function (error) {
           reject(error)
@@ -248,21 +273,19 @@ const actions = {
     })
   },
   setTask({ commit }, tplName){
-    // debugger;
     return new Promise((resolve, reject) => {
       axios({
-        url: '/template.php',
+        url: '/template',
         baseURL: config.base_url,
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        headers: {'Content-Type': 'application/json'},
         method: 'put',
         data: {tplName, cmd: 'set_task'}
       }).then(function (response) {
-          if (response.data.err == '') {
-            commit('set_new_task', response.data.payload)
-            resolve('OK')
-          } else {
+          if (response.status != 200) {
             reject(response.data.err ? response.data.err : '500 Ошибка обработки запроса на сервере.')
           }
+          commit('set_new_task', response.data.payload)
+          resolve('OK')
         })
         .catch(function (error) {
           reject(error)
@@ -282,18 +305,20 @@ const actions = {
     // if (!rootState.user.token) return
     return new Promise((resolve, reject) => {
       axios({
-        url: '/template.php',
+        url: 'template',
         baseURL: config.base_url,
+        // headers: {'Accept-Encoding': 'gzip,deflate'},
         method: 'get',
       })
         .then(function (response) {
           // console.log(response.data);
-          if (response.data.err == '') {
-            commit('setTplList', response.data.payload);
-            resolve('OK')
-          } else {
+          if (response.status != 200) {
             reject(response.data.err ? response.data.err : '500 Ошибка обработки запроса на сервере.')
           }
+
+          commit('setTplList', response.data.payload);
+          resolve('OK')
+
         })
         .catch(function (error) {
           reject(error)
@@ -304,18 +329,17 @@ const actions = {
     // if (!rootState.user.token) return
     return new Promise((resolve, reject) => {
       axios({
-        url: '/get_data.php',
+        url: '/bank',
         baseURL: config.base_url,
         method: 'get',
         params: {cmd: 'bank_list'}
       })
         .then(function (response) {
-          if (response.data.err == '') {
-            commit('set_bank_list', response.data.payload)
-            resolve('OK')
-          } else {
+          if (response.status != 200) {
             reject(response.data.err ? response.data.err : '500 Ошибка обработки запроса на сервере.')
           }
+          commit('set_bank_list', response.data.payload)
+          resolve('OK')
         })
         .catch(function (error) {
           reject(error)
@@ -330,12 +354,11 @@ const actions = {
         method: 'get',
         params: {cmd: 'portfolio_list', payload}
       }).then(function (response) {
-          if (response.data.err == '') {
-            commit('set_portfolio_list', response.data.payload)
-            resolve('OK')
-          } else {
+          if (response.status != 200) {
             reject(response.data.err ? response.data.err : '500 Ошибка обработки запроса на сервере.')
           }
+          commit('set_portfolio_list', response.data.payload)
+          resolve('OK')
         })
         .catch(function (error) {
           reject(error)
@@ -345,17 +368,16 @@ const actions = {
   saveTpl({state}, tplName) {
     return new Promise((resolve, reject) => {
       axios({
-        url: '/template.php',
+        url: '/template',
         baseURL: config.base_url,
         method: 'post',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        // headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         data: {'items': state.items, tplName}
       }).then(function (response) {
-          if (response.data.err == '') {
-            resolve('OK')
-          } else {
+          if (response.status != 200) {
             reject(response.data.err ? response.data.err : '500 Ошибка обработки запроса на сервере.')
           }
+          resolve('OK')
         })
         .catch(function (error) {
           reject(error)

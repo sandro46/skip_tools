@@ -3,7 +3,7 @@
     <div class="navbar-wrap">
       <b-navbar toggleable type="light" variant="light">
           <b-navbar-toggle target="nav_text_collapse"></b-navbar-toggle>
-          <b-navbar-brand>SkipTools</b-navbar-brand>
+          <b-navbar-brand>BFS Search</b-navbar-brand>
           <b-collapse is-nav id="nav_text_collapse">
               <b-navbar-nav>
                 <b-nav-item href="#"><router-link to="/">Планировщик</router-link></b-nav-item>

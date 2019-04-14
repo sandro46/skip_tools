@@ -1,6 +1,6 @@
 module.exports = {
-  baseUrl: '/xskip/skip_tools',
-  outputDir: 'skip_tools',
+  baseUrl: '/search/front',
+  outputDir: './front',
   assetsDir: undefined,
   runtimeCompiler: undefined,
   productionSourceMap: undefined,
